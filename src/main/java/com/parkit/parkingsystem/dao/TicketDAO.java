@@ -15,7 +15,7 @@ import java.sql.Timestamp;
 
 public class TicketDAO {
 
-    private static final Logger logger = LogManager.getLogger("TicketDAO");
+    private static final Logger LOGGER = LogManager.getLogger("TicketDAO");
 
     public DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
@@ -33,7 +33,7 @@ public class TicketDAO {
             ps.setTimestamp(5, (ticket.getOutTime() == null) ? null : (new Timestamp(ticket.getOutTime().getTime())));
             return ps.execute();
         } catch (Exception ex) {
-            logger.error("Error fetching next available slot", ex);
+            LOGGER.error("Error fetching next available slot", ex);
         } finally {
             dataBaseConfig.closeConnection(con);
             return false;
@@ -62,7 +62,7 @@ public class TicketDAO {
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
         } catch (Exception ex) {
-            logger.error("Error fetching next available slot", ex);
+            LOGGER.error("Error fetching next available slot", ex);
         } finally {
             dataBaseConfig.closeConnection(con);
             return ticket;
@@ -80,7 +80,7 @@ public class TicketDAO {
             ps.execute();
             return true;
         } catch (Exception ex) {
-            logger.error("Error saving ticket info", ex);
+            LOGGER.error("Error saving ticket info", ex);
         } finally {
             dataBaseConfig.closeConnection(con);
         }
