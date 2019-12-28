@@ -13,27 +13,51 @@ import java.util.Date;
 
 public class ParkingService {
 
+    /**
+     * ParkingService class logger.
+     */
     private static final Logger LOGGER = LogManager.getLogger("ParkingService");
 
+    /**
+     * FareCalculatorService global implementation.
+     */
     private static FareCalculatorService fareCalculatorService = new FareCalculatorService();
 
+    /**
+     * inputReaderUtil member attribute.
+     */
     private InputReaderUtil inputReaderUtil;
+    /**
+     * parkingSpotDAO member attribute.
+     */
     private ParkingSpotDAO parkingSpotDAO;
+    /**
+     * ticketDAO member attribute.
+     */
     private TicketDAO ticketDAO;
 
-    public ParkingService(InputReaderUtil inputReaderUtil, ParkingSpotDAO parkingSpotDAO, TicketDAO ticketDAO) {
-        this.inputReaderUtil = inputReaderUtil;
-        this.parkingSpotDAO = parkingSpotDAO;
-        this.ticketDAO = ticketDAO;
+    /**
+     * Public constructor initializing inputReader and DAOs.
+     * @param inputReaderUtilTmp passed from InteractiveShell
+     * @param parkingSpotDAOTmp passed from InteractiveShell
+     * @param ticketDAOTmp passed from InteractiveShell
+     */
+    public ParkingService(final InputReaderUtil inputReaderUtilTmp, final ParkingSpotDAO parkingSpotDAOTmp, final TicketDAO ticketDAOTmp) {
+        this.inputReaderUtil = inputReaderUtilTmp;
+        this.parkingSpotDAO = parkingSpotDAOTmp;
+        this.ticketDAO = ticketDAOTmp;
     }
 
+    /**
+     * Start registration process for an incoming vehicle.
+     */
     public void processIncomingVehicle() {
         try {
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
             if (parkingSpot != null && parkingSpot.getId() > 0) {
-                String vehicleRegNumber = getVehichleRegNumber();
+                String vehicleRegNumber = getVehicleRegNumber();
                 parkingSpot.setAvailable(false);
-                parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark it's availability as false
+                parkingSpotDAO.updateParking(parkingSpot); //allot this parking space and mark it's availability as false
 
                 Date inTime = new Date();
                 Ticket ticket = new Ticket();
@@ -54,16 +78,24 @@ public class ParkingService {
         }
     }
 
-    private String getVehichleRegNumber() throws Exception {
+    /**
+     * Get vehicle registration number from user.
+     * @return Valid vehicle registration number string
+     * @throws Exception IllegalArgumentException for wrong registration number format
+     */
+    private String getVehicleRegNumber() throws Exception {
         System.out.println("Please type the vehicle registration number and press enter key");
         return inputReaderUtil.readVehicleRegistrationNumber();
     }
 
+    /**
+     * @return available ParkingSpot for user vehicle.
+     */
     public ParkingSpot getNextParkingNumberIfAvailable() {
         int parkingNumber = 0;
         ParkingSpot parkingSpot = null;
         try {
-            ParkingType parkingType = getVehichleType();
+            ParkingType parkingType = getVehicleType();
             parkingNumber = parkingSpotDAO.getNextAvailableSlot(parkingType);
             if (parkingNumber > 0) {
                 parkingSpot = new ParkingSpot(parkingNumber, parkingType, true);
@@ -78,28 +110,34 @@ public class ParkingService {
         return parkingSpot;
     }
 
-    private ParkingType getVehichleType() {
+    /**
+     * Get vehicle type from user.
+     * @return ParkingType
+     */
+    private ParkingType getVehicleType() {
         System.out.println("Please select vehicle type from menu");
+        final int carEntry = 1;
+        final int bikeEntry = 2;
         System.out.println("1 CAR");
         System.out.println("2 BIKE");
         int input = inputReaderUtil.readSelection();
         switch (input) {
-            case 1: {
+            case carEntry:
                 return ParkingType.CAR;
-            }
-            case 2: {
+            case bikeEntry:
                 return ParkingType.BIKE;
-            }
-            default: {
+            default:
                 System.out.println("Incorrect input provided");
                 throw new IllegalArgumentException("Entered input is invalid");
-            }
         }
     }
 
+    /**
+     * Resolve user parking by asking parking fare.
+     */
     public void processExitingVehicle() {
         try {
-            String vehicleRegNumber = getVehichleRegNumber();
+            String vehicleRegNumber = getVehicleRegNumber();
             Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
             Date outTime = new Date();
             ticket.setOutTime(outTime);
