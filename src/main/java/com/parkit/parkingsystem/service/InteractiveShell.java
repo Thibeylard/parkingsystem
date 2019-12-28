@@ -6,10 +6,18 @@ import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class InteractiveShell {
+public final class InteractiveShell {
 
+    /**
+     * InteractiveShell class logger.
+     */
     private static final Logger LOGGER = LogManager.getLogger("InteractiveShell");
 
+    private InteractiveShell() { };
+
+    /**
+     * Create API, handle entries.
+     */
     public static void loadInterface() {
         LOGGER.info("App initialized!!!");
         System.out.println("Welcome to Parking System!");
@@ -21,16 +29,19 @@ public class InteractiveShell {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 
         while (continueApp) {
+            final int incomingEntry = 1;
+            final int exitingEntry = 2;
+            final int shutdownEntry = 3;
             loadMenu();
             int option = inputReaderUtil.readSelection();
             switch (option) {
-                case 1:
+                case incomingEntry:
                     parkingService.processIncomingVehicle();
                     break;
-                case 2:
+                case exitingEntry:
                     parkingService.processExitingVehicle();
                     break;
-                case 3:
+                case shutdownEntry:
                     System.out.println("Exiting from the system!");
                     continueApp = false;
                     break;
