@@ -61,6 +61,7 @@ public class ParkingService {
 
                 Date inTime = new Date();
                 Ticket ticket = new Ticket();
+                //TODO: Check this part. Why set ticketID in comments?
                 //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
                 //ticket.setId(ticketID);
                 ticket.setParkingSpot(parkingSpot);
