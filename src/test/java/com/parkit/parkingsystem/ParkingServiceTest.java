@@ -10,34 +10,52 @@ import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 
-import static org.mockito.Mockito.*;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.anyString;
+
 
 @ExtendWith(MockitoExtension.class)
 public class ParkingServiceTest {
 
+    /**
+     * Class Under Test.
+     */
     private static ParkingService parkingService;
-
+    /**
+     * inputReaderUtil mock : simulate user entries.
+     */
     @Mock
     private static InputReaderUtil inputReaderUtil;
+    /**
+     * parkingSpotDAO mock : simulate database access to ParkingSpot table.
+     */
     @Mock
     private static ParkingSpotDAO parkingSpotDAO;
+    /**
+     * ticketDAO mock : simulate database access to Ticket table.
+     */
     @Mock
     private static TicketDAO ticketDAO;
 
+    /**
+     * Initialize theoretical situation for tests.
+     */
     @BeforeEach
     private void setUpPerTest() {
         try {
             when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
-            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
+            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
             Ticket ticket = new Ticket();
-            ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
+            ticket.setInTime(new Date(System.currentTimeMillis() - (60 * 60 * 1000)));
             ticket.setParkingSpot(parkingSpot);
             ticket.setVehicleRegNumber("ABCDEF");
             when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
@@ -48,12 +66,15 @@ public class ParkingServiceTest {
             parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         } catch (Exception e) {
             e.printStackTrace();
-            throw  new RuntimeException("Failed to set up test mock objects");
+            throw new RuntimeException("Failed to set up test mock objects");
         }
     }
 
+    /**
+     * Check if processExitingVehicleTest has really called parkingSpotDAO.updateParking().
+     */
     @Test
-    public void processExitingVehicleTest(){
+    public void Given_anyParkedVehicle_When_exitParking_Then_callParkingSpotDAOUpdateParkingMethod() {
         parkingService.processExitingVehicle();
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
