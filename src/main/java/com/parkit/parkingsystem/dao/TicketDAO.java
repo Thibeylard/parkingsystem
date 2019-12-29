@@ -109,7 +109,7 @@ public class TicketDAO {
     }
 
     /**
-     * Modify dataBaseConfig member attribute (used in ParkingDataBaseIT).
+     * Set dataBaseConfig member attribute (used in ParkingDataBaseIT).
      * @param dataBaseConfigToSet new dataBaseConfig to set
      */
     public void setDataBaseConfig(final DataBaseConfig dataBaseConfigToSet) {
