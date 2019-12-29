@@ -15,11 +15,22 @@ import java.sql.Timestamp;
 
 public class TicketDAO {
 
+    /**
+     * TicketDAO class logger.
+     */
     private static final Logger LOGGER = LogManager.getLogger("TicketDAO");
 
-    public DataBaseConfig dataBaseConfig = new DataBaseConfig();
+    /**
+     * Database Configuration object.
+     */
+    private DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
-    public boolean saveTicket(Ticket ticket) {
+    /**
+     * Save ticket object to Ticket table.
+     * @param ticket object to save
+     * @return true if operation succeeded
+     */
+    public boolean saveTicket(final Ticket ticket) {
         Connection con = null;
         try {
             con = dataBaseConfig.getConnection();
@@ -40,7 +51,12 @@ public class TicketDAO {
         }
     }
 
-    public Ticket getTicket(String vehicleRegNumber) {
+    /**
+     * Get ticket objet from Ticket table.
+     * @param vehicleRegNumber used to retrieve ticket
+     * @return ticket object
+     */
+    public Ticket getTicket(final String vehicleRegNumber) {
         Connection con = null;
         Ticket ticket = null;
         try {
@@ -69,7 +85,12 @@ public class TicketDAO {
         }
     }
 
-    public boolean updateTicket(Ticket ticket) {
+    /**
+     * Modify ticket in Ticket table.
+     * @param ticket object to modify
+     * @return true if operation succeeded
+     */
+    public boolean updateTicket(final Ticket ticket) {
         Connection con = null;
         try {
             con = dataBaseConfig.getConnection();
@@ -85,5 +106,13 @@ public class TicketDAO {
             dataBaseConfig.closeConnection(con);
         }
         return false;
+    }
+
+    /**
+     * Modify dataBaseConfig member attribute (used in ParkingDataBaseIT).
+     * @param dataBaseConfigToSet new dataBaseConfig to set
+     */
+    public void setDataBaseConfig(final DataBaseConfig dataBaseConfigToSet) {
+        this.dataBaseConfig = dataBaseConfigToSet;
     }
 }
