@@ -16,14 +16,15 @@ public class FareCalculatorService {
         }
 
         //TODO: Some tests are failing here. Need to check if this logic is correct
-        long duration = ticket.getOutTime().toEpochMilli() - ticket.getInTime().toEpochMilli();
+        long durationInMs = ticket.getOutTime().toEpochMilli() - ticket.getInTime().toEpochMilli();
+        float durationInHour = durationInMs / 3600000;
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR:
-                ticket.setPrice(duration * Fare.CAR_RATE_PER_HOUR);
+                ticket.setPrice(durationInHour * Fare.CAR_RATE_PER_HOUR);
                 break;
             case BIKE:
-                ticket.setPrice(duration * Fare.BIKE_RATE_PER_HOUR);
+                ticket.setPrice(durationInHour * Fare.BIKE_RATE_PER_HOUR);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown Parking Type");
