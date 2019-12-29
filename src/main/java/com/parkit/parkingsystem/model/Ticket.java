@@ -1,6 +1,6 @@
 package com.parkit.parkingsystem.model;
 
-import java.util.Date;
+import java.time.Instant;
 
 public class Ticket {
     /**
@@ -22,11 +22,11 @@ public class Ticket {
     /**
      * Creation time.
      */
-    private Date inTime;
+    private Instant inTime;
     /**
      * Resolution time.
      */
-    private Date outTime;
+    private Instant outTime;
 
     /**
      * @return unique identifier
@@ -87,28 +87,28 @@ public class Ticket {
     /**
      * @return ticket creation time.
      */
-    public Date getInTime() {
+    public Instant getInTime() {
         return inTime;
     }
 
     /**
      * @param inTimeToSet new creation time.
      */
-    public void setInTime(final Date inTimeToSet) {
+    public void setInTime(final Instant inTimeToSet) {
         this.inTime = inTimeToSet;
     }
 
     /**
      * @return resolution time.
      */
-    public Date getOutTime() {
+    public Instant getOutTime() {
         return outTime;
     }
 
     /**
      * @param outTimeToSet new resolution time.
      */
-    public void setOutTime(final Date outTimeToSet) {
+    public void setOutTime(final Instant outTimeToSet) {
         this.outTime = outTimeToSet;
     }
 }

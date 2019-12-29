@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.Date;
 
 import org.mockito.Mock;
@@ -55,7 +56,7 @@ public class ParkingServiceTest {
 
             ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
             Ticket ticket = new Ticket();
-            ticket.setInTime(new Date(System.currentTimeMillis() - (60 * 60 * 1000)));
+            ticket.setInTime(Instant.now().minusMillis(60 * 60 * 1000));
             ticket.setParkingSpot(parkingSpot);
             ticket.setVehicleRegNumber("ABCDEF");
             when(ticketDAO.getTicket(anyString())).thenReturn(ticket);

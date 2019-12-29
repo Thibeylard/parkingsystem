@@ -10,17 +10,13 @@ public class FareCalculatorService {
      * @param ticket passed from ParkingService.processExitingVehicle()
      */
     public void calculateFare(final Ticket ticket) {
-        if ((ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime()))) {
+        if ((ticket.getOutTime() == null) || (ticket.getOutTime().isBefore(ticket.getInTime()))) {
             assert ticket.getOutTime() != null;
             throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
         }
 
-        //TODO: check Joda-Time to replace Date deprecated methods.
-        int inHour = ticket.getInTime().getHours();
-        int outHour = ticket.getOutTime().getHours();
-
         //TODO: Some tests are failing here. Need to check if this logic is correct
-        int duration = outHour - inHour;
+        long duration = ticket.getOutTime().toEpochMilli() - ticket.getInTime().toEpochMilli();
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR:
