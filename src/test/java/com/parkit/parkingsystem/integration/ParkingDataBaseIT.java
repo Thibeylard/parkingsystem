@@ -16,6 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+
+import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -58,26 +61,44 @@ public class ParkingDataBaseIT {
 
     }
 
-    @Test
-    public void Given_userEntersWithCar_When_saveTicketForParking_Then_ticketSavedInDatabase() {
+    private void carEntersParking() {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
+    }
+
+    @Test
+    public void Given_noTicket_When_userEntersWithCar_Then_ticketSavedInDatabase() {
+        carEntersParking();
         assertTrue(ticketDAO.getTicket(this.regNumber).getClass() == Ticket.class);
     }
 
     @Test
-    public void Given_userEntersWithCar_When_parkOnParkingSpot1_Then_nextParkingSpotIs2() {
-        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        parkingService.processIncomingVehicle();
-        assertEquals(2,parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); // ParkingSpot n°1 is supposed to be unavailable. nextAvailableSpot expected is n°2.
+    public void Given_parkingSpot1Available_When_userEntersWithCar_Then_nextParkingSpotIs2() {
+        carEntersParking();
+        assertEquals(2, parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); // ParkingSpot n°1 is supposed to be unavailable. nextAvailableSpot expected is n°2.
     }
 
-    @Test
-    public void testParkingLotExit() {
-        Given_userEntersWithCar_When_saveTicketForParking_Then_ticketSavedInDatabase();
+
+    private void carLeavesParking() {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();
+        Ticket ticket = ticketDAO.getTicket(this.regNumber);
+        ticket.setInTime(Instant.now().minusSeconds(3600));
         parkingService.processExitingVehicle();
         //TODO: check that the fare generated and out time are populated correctly in the database
     }
+
+    @Test
+    public void Given_dateIs01Jan2020Midnight_When_userLeavesWithCar_Then_outTimeIs01jan2020Midnight() {
+        carLeavesParking();
+        fail();
+    }
+
+    @Test
+    public void Given_parkedForOneHour_When_userLeavesWithCar_Then_fareEqualsOneHourParking() {
+        carLeavesParking();
+        fail();
+    }
+
 
 }
