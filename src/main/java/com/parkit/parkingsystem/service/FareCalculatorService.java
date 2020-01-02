@@ -9,11 +9,14 @@ public class FareCalculatorService {
 
     /**
      * Calculate parking fare based on user ticket.
+     *
      * @param ticket passed from ParkingService.processExitingVehicle()
      */
     public void calculateFare(final Ticket ticket) {
-        if ((ticket.getOutTime() == null) || (ticket.getOutTime().isBefore(ticket.getInTime()))) {
-            assert ticket.getOutTime() != null;
+        if ((ticket.getOutTime() == null)) {
+            throw new IllegalArgumentException("No out time provided");
+        }
+        if ((ticket.getOutTime().isBefore(ticket.getInTime()))) {
             throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
         }
 
