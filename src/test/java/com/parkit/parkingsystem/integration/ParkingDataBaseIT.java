@@ -1,5 +1,6 @@
 package com.parkit.parkingsystem.integration;
 
+import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
@@ -15,8 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,6 +63,13 @@ public class ParkingDataBaseIT {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
         assertTrue(ticketDAO.getTicket(this.regNumber).getClass() == Ticket.class);
+    }
+
+    @Test
+    public void Given_userEntersWithCar_When_parkOnParkingSpot1_Then_nextParkingSpotIs2() {
+        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();
+        assertEquals(2,parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); // ParkingSpot n°1 is supposed to be unavailable. nextAvailableSpot expected is n°2.
     }
 
     @Test

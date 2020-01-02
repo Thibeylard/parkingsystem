@@ -61,9 +61,7 @@ public class ParkingService {
 
                 Instant inTime = Instant.now();
                 Ticket ticket = new Ticket();
-                //TODO: Check this part. Why set ticketID in comments?
                 //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
-                //ticket.setId(ticketID);
                 ticket.setParkingSpot(parkingSpot);
                 ticket.setVehicleRegNumber(vehicleRegNumber);
                 ticket.setPrice(0);
