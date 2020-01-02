@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.temporal.ChronoUnit;
 
 public class TicketDAO {
 
@@ -72,8 +73,8 @@ public class TicketDAO {
                 ticket.setId(rs.getInt(2));
                 ticket.setVehicleRegNumber(vehicleRegNumber);
                 ticket.setPrice(rs.getDouble(3));
-                ticket.setInTime(rs.getTimestamp(4).toInstant());
-                ticket.setOutTime(rs.getTimestamp(5).toInstant());
+                ticket.setInTime(rs.getTimestamp(4).toInstant().truncatedTo(ChronoUnit.MINUTES));
+                ticket.setOutTime(rs.getTimestamp(5).toInstant().truncatedTo(ChronoUnit.MINUTES));
             }
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);

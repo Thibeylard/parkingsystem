@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public class ParkingService {
 
@@ -59,7 +60,7 @@ public class ParkingService {
                 parkingSpot.setAvailable(false);
                 parkingSpotDAO.updateParking(parkingSpot); //allot this parking space and mark it's availability as false
 
-                Instant inTime = Instant.now();
+                Instant inTime = Instant.now().truncatedTo(ChronoUnit.MINUTES);
                 Ticket ticket = new Ticket();
                 //TODO: Check this part. Why set ticketID in comments?
                 //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
@@ -140,7 +141,7 @@ public class ParkingService {
         try {
             String vehicleRegNumber = getVehicleRegNumber();
             Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
-            Instant outTime = Instant.now();
+            Instant outTime = Instant.now().truncatedTo(ChronoUnit.MINUTES);
             ticket.setOutTime(outTime);
             fareCalculatorService.calculateFare(ticket);
             if (ticketDAO.updateTicket(ticket)) {
