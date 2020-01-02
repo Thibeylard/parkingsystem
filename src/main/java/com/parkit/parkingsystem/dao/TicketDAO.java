@@ -52,7 +52,7 @@ public class TicketDAO {
     }
 
     /**
-     * Get ticket objet from Ticket table.
+     * Get ticket object from Ticket table.
      * @param vehicleRegNumber used to retrieve ticket
      * @return ticket object
      */
@@ -73,12 +73,15 @@ public class TicketDAO {
                 ticket.setVehicleRegNumber(vehicleRegNumber);
                 ticket.setPrice(rs.getDouble(3));
                 ticket.setInTime(rs.getTimestamp(4).toInstant());
-                ticket.setOutTime(rs.getTimestamp(5).toInstant());
+                // In most cases, ticket is needed when not already closed. Must check value to avoid nullPointerException
+                if(rs.getTimestamp(5) != null) {
+                    ticket.setOutTime(rs.getTimestamp(5).toInstant());
+                }
             }
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
         } catch (Exception ex) {
-            LOGGER.error("Error fetching next available slot", ex);
+            LOGGER.error("Error fetching ticket", ex);
         } finally {
             dataBaseConfig.closeConnection(con);
             return ticket;
