@@ -37,17 +37,17 @@ public class DataBasePrepareService {
     }
 
     /**
-     *
-     * @param ticket
-     * @param msToAntedate
-     * @return
+     * Used to antedate a ticket for reproductibility purpose
+     * @param ticket ticket to antedate
+     * @param msToAntedate Number of milliseconds to antedate
+     * @return true if operation succeeded
      */
     public boolean antedateTicket(final Ticket ticket, final double msToAntedate) {
         Connection con = null;
         try {
             con = dataBaseTestConfig.getConnection();
             PreparedStatement ps = con.prepareStatement("update ticket set IN_TIME=? where ID=?");
-            ps.setTimestamp(1, new Timestamp(Instant.now().minusMillis(3600000).toEpochMilli()));
+            ps.setTimestamp(1, new Timestamp(Instant.now().minusMillis((long)msToAntedate).toEpochMilli()));
             ps.setInt(2, ticket.getId());
             ps.execute();
             return true;

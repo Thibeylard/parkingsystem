@@ -75,7 +75,7 @@ public class TicketDAO {
                 ticket.setPrice(rs.getDouble(3));
                 ticket.setInTime(rs.getTimestamp(4).toInstant().truncatedTo(ChronoUnit.MINUTES));
                 // In most cases, ticket is needed when not already closed. Must check value to avoid nullPointerException
-                if(rs.getTimestamp(5) != null) {
+                if (rs.getTimestamp(5) != null) {
 
                     ticket.setOutTime(rs.getTimestamp(5).toInstant().truncatedTo(ChronoUnit.MINUTES));
                 }
