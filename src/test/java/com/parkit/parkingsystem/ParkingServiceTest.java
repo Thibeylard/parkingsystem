@@ -80,10 +80,10 @@ public class ParkingServiceTest {
      */
     @Test
     public void Given_anyParkedVehicle_When_exitParking_Then_callParkingSpotDAOUpdateParkingMethod() {
+        ParkingSpot parkingSpot;
         try {
             when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-
-            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+            parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
             Ticket ticket = new Ticket();
             ticket.setInTime(Instant.now().minusMillis(60 * 60 * 1000));
             ticket.setParkingSpot(parkingSpot);

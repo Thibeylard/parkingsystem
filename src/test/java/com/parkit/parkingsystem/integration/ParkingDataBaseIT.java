@@ -6,6 +6,7 @@ import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
+import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
@@ -17,10 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.text.DecimalFormat;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +48,10 @@ public class ParkingDataBaseIT {
      * Predefined value for regNumber values.
      */
     private final String regNumber = "ABCDEF";
+    /**
+     * DecimalFormat use for fare format
+     */
+    private static DecimalFormat df = new DecimalFormat();
 
     /**
      * Mock for user entries.
@@ -64,6 +70,7 @@ public class ParkingDataBaseIT {
         ticketDAO = new TicketDAO();
         ticketDAO.setDataBaseConfig(dataBaseTestConfig);
         dataBasePrepareService = new DataBasePrepareService();
+        df.setMaximumFractionDigits(2);
     }
 
     /**
@@ -103,12 +110,44 @@ public class ParkingDataBaseIT {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
         Ticket ticket = ticketDAO.getTicket(this.regNumber);
-        dataBasePrepareService.antedateTicket(ticket, 3600000);
+        dataBasePrepareService.antedateInTimeTicket(ticket, 3600000);
         parkingService.processExitingVehicle();
         ticket = ticketDAO.getTicket(this.regNumber);
+
+        double expectedFare = Double.parseDouble(df.format((ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / 3600000.) * Fare.CAR_RATE_PER_HOUR).replace(',', '.'));
         assertEquals(ticket.getInTime().plusMillis(3600000).truncatedTo(ChronoUnit.MINUTES), ticket.getOutTime());
-        assertEquals((ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / 3600000.) * Fare.CAR_RATE_PER_HOUR, ticket.getPrice());
+        assertEquals(expectedFare, ticket.getPrice());
     }
 
+    /**
+     * Check consistency of Ticket database table price and outTime values.
+     * @throws Exception in case readVehicleRegistrationNumber fails
+     */
+    @Test
+    public void Given_recurringUser_When_userLeaves_Then_fareDiscountedBy5Percent() throws Exception {
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(this.regNumber); // Registration number is read once more in this method : On entrance then on exit.
+
+        // Save fake old ticket.
+        Ticket oldTicket = new Ticket();
+        oldTicket.setInTime(Instant.EPOCH);
+        oldTicket.setOutTime(Instant.EPOCH.plusMillis(3600000));
+        oldTicket.setVehicleRegNumber(this.regNumber);
+        oldTicket.setParkingSpot(new ParkingSpot(5,ParkingType.CAR,false));
+        oldTicket.setDiscounted(false);
+        ticketDAO.saveTicket(oldTicket);
+
+        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();
+
+        Ticket ticket = ticketDAO.getTicket(this.regNumber);
+        dataBasePrepareService.antedateInTimeTicket(ticket, 3600000);
+
+        parkingService.processExitingVehicle();
+        ticket = ticketDAO.getTicket(this.regNumber);
+
+        double expectedFare = Double.parseDouble(df.format((ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / 3600000.) * Fare.CAR_RATE_PER_HOUR * 0.95).replace(',', '.'));
+        assertTrue(ticket.isDiscounted());
+        assertEquals(expectedFare, ticket.getPrice());
+    }
 
 }

@@ -43,6 +43,6 @@ public class FareCalculatorService {
         df.setMaximumFractionDigits(2);
 
         String priceToParse = df.format(finalPrice).replace(',', '.');
-        ticket.setPrice(Double.parseDouble((priceToParse)));
+        ticket.setPrice(Double.parseDouble((priceToParse.trim())));
     }
 }
