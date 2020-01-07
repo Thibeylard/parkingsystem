@@ -42,12 +42,12 @@ public class DataBasePrepareService {
      * @param msToAntedate Number of milliseconds to antedate
      * @return true if operation succeeded
      */
-    public boolean antedateTicket(final Ticket ticket, final double msToAntedate) {
+    public boolean antedateTicket(final Ticket ticket, final long msToAntedate) {
         Connection con = null;
         try {
             con = dataBaseTestConfig.getConnection();
             PreparedStatement ps = con.prepareStatement("update ticket set IN_TIME=? where ID=?");
-            ps.setTimestamp(1, new Timestamp(Instant.now().minusMillis((long)msToAntedate).toEpochMilli()));
+            ps.setTimestamp(1, new Timestamp(Instant.now().minusMillis(msToAntedate).toEpochMilli()));
             ps.setInt(2, ticket.getId());
             ps.execute();
             return true;

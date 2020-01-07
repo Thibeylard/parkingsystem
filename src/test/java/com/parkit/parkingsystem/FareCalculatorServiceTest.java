@@ -53,8 +53,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_oneHourCarParking_When_calculateFare_Then_priceEqualCarRatePerHour() {
-        Instant inTime = Instant.now().minusMillis((60 * 60 * 1000));
-        Instant outTime = Instant.now();
+        Instant inTime = Instant.EPOCH;
+        Instant outTime = Instant.EPOCH.plusMillis(60 * 60 * 1000);
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
 
         ticket.setInTime(inTime);
@@ -69,8 +69,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_oneHourBikeParking_When_calculateFare_Then_priceEqualBikeRatePerHour() {
-        Instant inTime = Instant.now().minusMillis((60 * 60 * 1000));
-        Instant outTime = Instant.now();
+        Instant inTime = Instant.EPOCH;
+        Instant outTime = Instant.EPOCH.plusMillis(60 * 60 * 1000);
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
 
         ticket.setInTime(inTime);
@@ -85,8 +85,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_oneHourParkingForUnknownVehicle_When_calculateFare_Then_throwsNullPointerException() {
-        Instant inTime = Instant.now().minusMillis((60 * 60 * 1000));
-        Instant outTime = Instant.now();
+        Instant inTime = Instant.EPOCH;
+        Instant outTime = Instant.EPOCH.plusMillis(60 * 60 * 1000);
         ParkingSpot parkingSpot = new ParkingSpot(1, null, false);
 
         ticket.setInTime(inTime);
@@ -100,8 +100,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_inTimeGreaterThanOutTimeParking_When_calculateFare_Then_throwsIllegalArgumentException() {
-        Instant inTime = Instant.now().plusMillis((60 * 60 * 1000));
-        Instant outTime = Instant.now();
+        Instant inTime = Instant.EPOCH.plusMillis(60 * 60 * 1000);
+        Instant outTime = Instant.EPOCH;
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
 
         ticket.setInTime(inTime);
@@ -115,8 +115,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_threeQuarterOfHourBikeParking_When_calculateFare_Then_priceEqualTo75PercentOfBikeHourRate() {
-        Instant inTime = Instant.now().minusMillis((45 * 60 * 1000)); //45 minutes parking time should give 3/4th parking fare
-        Instant outTime = Instant.now();
+        Instant inTime = Instant.EPOCH;
+        Instant outTime = Instant.EPOCH.plusMillis(45 * 60 * 1000); //45 minutes parking time should give 3/4th parking fare
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
 
         ticket.setInTime(inTime);
@@ -132,8 +132,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_threeQuarterOfHourCarParking_When_calculateFare_Then_priceEqualTo75PercentOfCarHourRate() {
-        Instant inTime = Instant.now().minusMillis((45 * 60 * 1000)); //45 minutes parking time should give 3/4th parking fare
-        Instant outTime = Instant.now();
+        Instant inTime = Instant.EPOCH;
+        Instant outTime = Instant.EPOCH.plusMillis(45 * 60 * 1000); //45 minutes parking time should give 3/4th parking fare
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
 
         ticket.setInTime(inTime);
@@ -149,8 +149,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_oneDayParking_When_calculateFare_Then_priceEqualTo24TimesHourRate() {
-        Instant inTime = Instant.now().minusMillis((24 * 60 * 60 * 1000)); //24 hours parking time should give 24 * parking fare per hour
-        Instant outTime = Instant.now();
+        Instant inTime = Instant.EPOCH;
+        Instant outTime = Instant.EPOCH.plusMillis(24 * 60 * 60 * 1000); //24 hours parking time should give 24 * parking fare per hour
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
 
         ticket.setInTime(inTime);
@@ -158,6 +158,7 @@ public class FareCalculatorServiceTest {
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
         assertEquals((24 * Fare.CAR_RATE_PER_HOUR), ticket.getPrice());
+
     }
 
 }
