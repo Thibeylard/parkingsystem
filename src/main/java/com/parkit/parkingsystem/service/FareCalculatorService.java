@@ -3,6 +3,8 @@ package com.parkit.parkingsystem.service;
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
 
+import java.text.DecimalFormat;
+
 public class FareCalculatorService {
 
     /**
@@ -20,16 +22,22 @@ public class FareCalculatorService {
 
         long durationInMs = ticket.getOutTime().toEpochMilli() - ticket.getInTime().toEpochMilli();
         double durationInHour = durationInMs / 3600000.;
+        String priceToParse = "";
+
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR:
-                ticket.setPrice(durationInHour * Fare.CAR_RATE_PER_HOUR);
+                priceToParse = df.format(durationInHour * Fare.CAR_RATE_PER_HOUR).replace(',', '.');
                 break;
             case BIKE:
-                ticket.setPrice(durationInHour * Fare.BIKE_RATE_PER_HOUR);
+                priceToParse = df.format(durationInHour * Fare.BIKE_RATE_PER_HOUR).replace(',', '.');
                 break;
             default:
                 throw new IllegalArgumentException("Unknown Parking Type");
         }
+
+        ticket.setPrice(Double.parseDouble((priceToParse)));
     }
 }

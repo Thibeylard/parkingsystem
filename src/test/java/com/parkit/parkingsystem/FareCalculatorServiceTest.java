@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
+import java.text.DecimalFormat;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,6 +26,10 @@ public class FareCalculatorServiceTest {
      * Real Ticket class instance.
      */
     private Ticket ticket;
+    /**
+     * DecimalFormat use for fare format
+     */
+    private DecimalFormat df = new DecimalFormat();
 
     /**
      * Initialize class under test.
@@ -40,6 +45,7 @@ public class FareCalculatorServiceTest {
     @BeforeEach
     private void setUpPerTest() {
         ticket = new Ticket();
+        this.df.setMaximumFractionDigits(2);
     }
 
     /**
@@ -117,7 +123,8 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals((0.75 * Fare.BIKE_RATE_PER_HOUR), ticket.getPrice());
+        double bikeRate = Double.parseDouble(df.format((0.75 * Fare.BIKE_RATE_PER_HOUR)).replace(',', '.'));
+        assertEquals(bikeRate, ticket.getPrice());
     }
 
     /**
@@ -133,7 +140,8 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals((0.75 * Fare.CAR_RATE_PER_HOUR), ticket.getPrice());
+        double carRate = Double.parseDouble(df.format((0.75 * Fare.CAR_RATE_PER_HOUR)).replace(',', '.'));
+        assertEquals(carRate, ticket.getPrice());
     }
 
     /**
