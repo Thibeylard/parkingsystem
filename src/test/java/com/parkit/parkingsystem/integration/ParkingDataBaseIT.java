@@ -62,42 +62,22 @@ public class ParkingDataBaseIT {
 
     }
 
-    private void carEntersParking() {
+    @Test
+    public void Given_parkingSpot1Available_When_userEntersWithCar_Then_ticketSavedAndSpotUnavailable() {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
-    }
-
-    @Test
-    public void Given_noTicket_When_userEntersWithCar_Then_ticketSavedInDatabase() {
-        carEntersParking();
-        assertTrue(ticketDAO.getTicket(this.regNumber).getClass() == Ticket.class);
-    }
-
-    @Test
-    public void Given_parkingSpot1Available_When_userEntersWithCar_Then_nextParkingSpotIs2() {
-        carEntersParking();
+        assertSame(ticketDAO.getTicket(this.regNumber).getClass(), Ticket.class);
         assertEquals(2, parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); // ParkingSpot n°1 is supposed to be unavailable. nextAvailableSpot expected is n°2.
     }
 
-
-    private Ticket carLeavesParking() {
+    @Test
+    public void Given_parkedForOneHour_When_userLeaves_Then_fareAndOutTimeAreCoherent() {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
         Ticket ticket = ticketDAO.getTicket(this.regNumber);
         dataBasePrepareService.antedateTicket(ticket,3600000);
         parkingService.processExitingVehicle();
-        return ticketDAO.getTicket(this.regNumber);
-    }
-
-    @Test
-    public void Given_inTimeInstant_When_userLeavesWithCarAfterOneHour_Then_outTimeIsInTimePlusOneHour() {
-        Ticket ticket = carLeavesParking();
         assertEquals(ticket.getInTime().plusMillis(3600000).truncatedTo(ChronoUnit.MINUTES),ticket.getOutTime());
-    }
-
-    @Test
-    public void Given_parkedForOneHour_When_userLeavesWithCar_Then_fareEqualsOneHourParking() {
-        Ticket ticket = carLeavesParking();
         assertEquals((ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / 3600000.) * Fare.CAR_RATE_PER_HOUR,ticket.getPrice());
     }
 
