@@ -56,7 +56,7 @@ public class ParkingServiceTest {
     }
 
     /**
-     * Check if processExitingVehicleTest has really called parkingSpotDAO.updateParking().
+     * Check if processIncomingVehicleTest has really called DAOs methods.
      */
     @Test
     public void Given_anyVehicle_When_enterParking_Then_callDAOMethods() throws Exception {

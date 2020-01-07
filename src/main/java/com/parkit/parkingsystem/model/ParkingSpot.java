@@ -64,10 +64,10 @@ public class ParkingSpot {
     }
 
     /**
-     * @param available : true or false
+     * @param stateToSet new isAvailable boolean state.
      */
-    public void setAvailable(final boolean available) {
-        isAvailable = available;
+    public void setAvailable(final boolean stateToSet) {
+        isAvailable = stateToSet;
     }
 
     /**

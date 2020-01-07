@@ -15,6 +15,7 @@ import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 public class FareCalculatorServiceTest {
 
@@ -44,7 +45,7 @@ public class FareCalculatorServiceTest {
      */
     @BeforeEach
     private void setUpPerTest() {
-        ticket = new Ticket();
+        this.ticket = new Ticket();
         this.df.setMaximumFractionDigits(2);
     }
 
@@ -115,6 +116,7 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_threeQuarterOfHourBikeParking_When_calculateFare_Then_priceEqualTo75PercentOfBikeHourRate() {
+        double expectedFare = Double.parseDouble(df.format((0.75 * Fare.BIKE_RATE_PER_HOUR)).replace(',', '.'));
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(45 * 60 * 1000); //45 minutes parking time should give 3/4th parking fare
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
@@ -123,8 +125,7 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        double bikeRate = Double.parseDouble(df.format((0.75 * Fare.BIKE_RATE_PER_HOUR)).replace(',', '.'));
-        assertEquals(bikeRate, ticket.getPrice());
+        assertEquals(expectedFare, ticket.getPrice());
     }
 
     /**
@@ -132,6 +133,7 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_threeQuarterOfHourCarParking_When_calculateFare_Then_priceEqualTo75PercentOfCarHourRate() {
+        double expectedFare = Double.parseDouble(df.format((0.75 * Fare.CAR_RATE_PER_HOUR)).replace(',', '.'));
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(45 * 60 * 1000); //45 minutes parking time should give 3/4th parking fare
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
@@ -140,8 +142,7 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        double carRate = Double.parseDouble(df.format((0.75 * Fare.CAR_RATE_PER_HOUR)).replace(',', '.'));
-        assertEquals(carRate, ticket.getPrice());
+        assertEquals(expectedFare, ticket.getPrice());
     }
 
     /**
@@ -158,7 +159,24 @@ public class FareCalculatorServiceTest {
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
         assertEquals((24 * Fare.CAR_RATE_PER_HOUR), ticket.getPrice());
-
     }
 
+    /**
+     * Check consistency between previous saved ticket and discount on new ticket.
+     */
+    @Test
+    public void Given_previousTicketForCarUser_When_calculateFare_Then_ticketPriceDiscountedBy5Percent() {
+        double discountedFare = Double.parseDouble(df.format((0.95 * Fare.CAR_RATE_PER_HOUR)).replace(',', '.'));
+
+        Instant inTime = Instant.EPOCH;
+        Instant outTime = Instant.EPOCH.plusMillis(60 * 60 * 1000);
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setDiscounted(true);
+        fareCalculatorService.calculateFare(ticket);
+        assertEquals(discountedFare, ticket.getPrice());
+    }
 }

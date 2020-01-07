@@ -22,22 +22,27 @@ public class FareCalculatorService {
 
         long durationInMs = ticket.getOutTime().toEpochMilli() - ticket.getInTime().toEpochMilli();
         double durationInHour = durationInMs / 3600000.;
-        String priceToParse = "";
-
-        DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(2);
+        double finalPrice = 0;
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR:
-                priceToParse = df.format(durationInHour * Fare.CAR_RATE_PER_HOUR).replace(',', '.');
+                finalPrice = durationInHour * Fare.CAR_RATE_PER_HOUR;
                 break;
             case BIKE:
-                priceToParse = df.format(durationInHour * Fare.BIKE_RATE_PER_HOUR).replace(',', '.');
+                finalPrice = durationInHour * Fare.BIKE_RATE_PER_HOUR;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown Parking Type");
         }
 
+        if (ticket.isDiscounted()) {
+            finalPrice *= 0.95;
+        }
+
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+
+        String priceToParse = df.format(finalPrice).replace(',', '.');
         ticket.setPrice(Double.parseDouble((priceToParse)));
     }
 }

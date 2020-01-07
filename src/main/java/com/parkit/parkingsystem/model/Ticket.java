@@ -27,6 +27,10 @@ public class Ticket {
      * Resolution time.
      */
     private Instant outTime;
+    /**
+     * Whether ticket has a discount applied.
+     */
+    private boolean isDiscounted;
 
     /**
      * @return unique identifier
@@ -110,5 +114,19 @@ public class Ticket {
      */
     public void setOutTime(final Instant outTimeToSet) {
         this.outTime = outTimeToSet;
+    }
+
+    /**
+     * @return true if discount on ticket.
+     */
+    public boolean isDiscounted() {
+        return this.isDiscounted;
+    }
+
+    /**
+     * @param stateToSet new isDiscounted boolean state.
+     */
+    public void setDiscounted(boolean stateToSet) {
+        this.isDiscounted = stateToSet;
     }
 }

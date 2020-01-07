@@ -43,6 +43,7 @@ public class TicketDAO {
             ps.setDouble(3, ticket.getPrice());
             ps.setTimestamp(4, new Timestamp(ticket.getInTime().toEpochMilli()));
             ps.setTimestamp(5, (ticket.getOutTime() == null) ? null : (new Timestamp(ticket.getOutTime().toEpochMilli())));
+            ps.setBoolean(6,ticket.isDiscounted());
             return ps.execute();
         } catch (Exception ex) {
             LOGGER.error("Error fetching next available slot", ex);
@@ -68,7 +69,7 @@ public class TicketDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 ticket = new Ticket();
-                ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(6)), false);
+                ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(7)), false);
                 ticket.setParkingSpot(parkingSpot);
                 ticket.setId(rs.getInt(2));
                 ticket.setVehicleRegNumber(vehicleRegNumber);
@@ -79,6 +80,7 @@ public class TicketDAO {
 
                     ticket.setOutTime(rs.getTimestamp(5).toInstant().truncatedTo(ChronoUnit.MINUTES));
                 }
+                ticket.setDiscounted(rs.getBoolean(6));
             }
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
