@@ -71,6 +71,7 @@ public class ParkingServiceTest {
         parkingService.processIncomingVehicle();
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
         verify(parkingSpotDAO, Mockito.times(1)).getNextAvailableSlot(ParkingType.CAR);
+        verify(ticketDAO, Mockito.times(1)).getTicket("ABCDEF");
         verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
     }
 

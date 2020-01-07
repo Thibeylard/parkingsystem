@@ -39,9 +39,10 @@ public class ParkingService {
 
     /**
      * Public constructor initializing inputReader and DAOs.
+     *
      * @param inputReaderUtilTmp passed from InteractiveShell
-     * @param parkingSpotDAOTmp passed from InteractiveShell
-     * @param ticketDAOTmp passed from InteractiveShell
+     * @param parkingSpotDAOTmp  passed from InteractiveShell
+     * @param ticketDAOTmp       passed from InteractiveShell
      */
     public ParkingService(final InputReaderUtil inputReaderUtilTmp, final ParkingSpotDAO parkingSpotDAOTmp, final TicketDAO ticketDAOTmp) {
         this.inputReaderUtil = inputReaderUtilTmp;
@@ -68,6 +69,10 @@ public class ParkingService {
                 ticket.setPrice(0);
                 ticket.setInTime(inTime);
                 ticket.setOutTime(null);
+                if (ticketDAO.getTicket(vehicleRegNumber) != null) {
+                    System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
+                    ticket.setDiscounted(true);
+                }
                 ticketDAO.saveTicket(ticket);
                 System.out.println("Generated Ticket and saved in DB");
                 System.out.println("Please park your vehicle in spot number:" + parkingSpot.getId());
@@ -80,6 +85,7 @@ public class ParkingService {
 
     /**
      * Get vehicle registration number from user.
+     *
      * @return Valid vehicle registration number string
      * @throws Exception IllegalArgumentException for wrong registration number format
      */
@@ -112,6 +118,7 @@ public class ParkingService {
 
     /**
      * Get vehicle type from user.
+     *
      * @return ParkingType
      */
     private ParkingType getVehicleType() {

@@ -26,11 +26,11 @@ public class Ticket {
     /**
      * Resolution time.
      */
-    private Instant outTime;
+    private Instant outTime = null;
     /**
      * Whether ticket has a discount applied.
      */
-    private boolean isDiscounted;
+    private boolean isDiscounted = false;
 
     /**
      * @return unique identifier

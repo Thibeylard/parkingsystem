@@ -105,6 +105,7 @@ public class ParkingDataBaseIT {
         Ticket ticket = ticketDAO.getTicket(this.regNumber);
         dataBasePrepareService.antedateTicket(ticket, 3600000);
         parkingService.processExitingVehicle();
+        ticket = ticketDAO.getTicket(this.regNumber);
         assertEquals(ticket.getInTime().plusMillis(3600000).truncatedTo(ChronoUnit.MINUTES), ticket.getOutTime());
         assertEquals((ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / 3600000.) * Fare.CAR_RATE_PER_HOUR, ticket.getPrice());
     }
