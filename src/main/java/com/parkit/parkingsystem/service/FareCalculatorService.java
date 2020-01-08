@@ -22,27 +22,32 @@ public class FareCalculatorService {
 
         long durationInMs = ticket.getOutTime().toEpochMilli() - ticket.getInTime().toEpochMilli();
         double durationInHour = durationInMs / 3600000.;
-        double finalPrice = 0;
 
-        switch (ticket.getParkingSpot().getParkingType()) {
-            case CAR:
-                finalPrice = durationInHour * Fare.CAR_RATE_PER_HOUR;
-                break;
-            case BIKE:
-                finalPrice = durationInHour * Fare.BIKE_RATE_PER_HOUR;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown Parking Type");
+        if (durationInHour < 0.5) {
+            ticket.setPrice(0);
         }
+        else {
+            double finalPrice = 0;
+            switch (ticket.getParkingSpot().getParkingType()) {
+                case CAR:
+                    finalPrice = durationInHour * Fare.CAR_RATE_PER_HOUR;
+                    break;
+                case BIKE:
+                    finalPrice = durationInHour * Fare.BIKE_RATE_PER_HOUR;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown Parking Type");
+            }
 
-        if (ticket.isDiscounted()) {
-            finalPrice *= 0.95;
+            if (ticket.isDiscounted()) {
+                finalPrice *= 0.95;
+            }
+
+            DecimalFormat df = new DecimalFormat();
+            df.setMaximumFractionDigits(2);
+
+            String priceToParse = df.format(finalPrice).replace(',', '.');
+            ticket.setPrice(Double.parseDouble((priceToParse.trim())));
         }
-
-        DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(2);
-
-        String priceToParse = df.format(finalPrice).replace(',', '.');
-        ticket.setPrice(Double.parseDouble((priceToParse.trim())));
     }
 }
