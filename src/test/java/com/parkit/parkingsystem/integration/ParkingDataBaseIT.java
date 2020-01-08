@@ -8,6 +8,7 @@ import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.AfterAll;
@@ -18,40 +19,38 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ParkingDataBaseIT {
 
     /**
-     * dataBaseConfig for tests access
+     * dataBaseConfig for tests access.
      */
     private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
     /**
-     * dataBasePrepareService for tests access
+     * dataBasePrepareService for tests access.
      */
     private static DataBasePrepareService dataBasePrepareService;
     /**
-     * Real ParkingSpotDAO instance
+     * Real ParkingSpotDAO instance.
      */
     private static ParkingSpotDAO parkingSpotDAO;
     /**
-     * Real TicketDAO instance
+     * Real TicketDAO instance.
      */
     private static TicketDAO ticketDAO;
     /**
      * Predefined value for regNumber values.
      */
-    private final String regNumber = "ABCDEF";
-    /**
-     * DecimalFormat use for fare format
-     */
-    private static DecimalFormat df = new DecimalFormat();
+    private static final String regNumber = "ABCDEF";
 
     /**
      * Mock for user entries.
@@ -60,7 +59,8 @@ public class ParkingDataBaseIT {
     private static InputReaderUtil inputReaderUtil;
 
     /**
-     * Global set up for integration tests
+     * Global set up for integration tests.
+     *
      * @throws Exception in case of database access fail
      */
     @BeforeAll
@@ -70,17 +70,17 @@ public class ParkingDataBaseIT {
         ticketDAO = new TicketDAO();
         ticketDAO.setDataBaseConfig(dataBaseTestConfig);
         dataBasePrepareService = new DataBasePrepareService();
-        df.setMaximumFractionDigits(2);
     }
 
     /**
      * Reinitialize mocked user entries and database for each tests.
+     *
      * @throws Exception in case of read entry fail
      */
     @BeforeEach
     private void setUpPerTest() throws Exception {
         when(inputReaderUtil.readSelection()).thenReturn(1);
-        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(this.regNumber);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(regNumber, regNumber); // Needs to be read twice : On entrance and exit.
         dataBasePrepareService.clearDataBaseEntries();
     }
 
@@ -96,58 +96,77 @@ public class ParkingDataBaseIT {
     public void Given_parkingSpot1Available_When_userEntersWithCar_Then_ticketSavedAndSpotUnavailable() {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
-        assertSame(ticketDAO.getTicket(this.regNumber).getClass(), Ticket.class);
+        assertSame(ticketDAO.getTicket(regNumber).getClass(), Ticket.class);
         assertEquals(2, parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); // ParkingSpot n°1 is supposed to be unavailable. nextAvailableSpot expected is n°2.
     }
 
     /**
      * Check consistency of Ticket database table price and outTime values.
+     *
      * @throws Exception in case readVehicleRegistrationNumber fails
      */
     @Test
     public void Given_parkedForOneHour_When_userLeaves_Then_fareAndOutTimeAreCoherent() throws Exception {
-        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(this.regNumber); // Registration number is read once more in this method : On entrance then on exit.
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        parkingService.processIncomingVehicle();
-        Ticket ticket = ticketDAO.getTicket(this.regNumber);
-        dataBasePrepareService.antedateInTimeTicket(ticket, 3600000);
-        parkingService.processExitingVehicle();
-        ticket = ticketDAO.getTicket(this.regNumber);
 
-        double expectedFare = Double.parseDouble(df.format((ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / 3600000.) * Fare.CAR_RATE_PER_HOUR).replace(',', '.'));
-        assertEquals(ticket.getInTime().plusMillis(3600000).truncatedTo(ChronoUnit.MINUTES), ticket.getOutTime());
+        parkingService.processIncomingVehicle();
+        Ticket ticket = ticketDAO.getTicket(regNumber); // Get ticket created in processIncomingVehicle()
+        dataBasePrepareService.antedateInTimeTicket(ticket, 60 * 60 * 1000); // Antedate to simulate parking-time
+        parkingService.processExitingVehicle();
+        ticket = ticketDAO.getTicket(regNumber); // Get back ticket updated in processExitingVehicle()
+
+        double expectedFare = FareCalculatorService.formatFare(ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / (60. * 60. * 1000.) * Fare.CAR_RATE_PER_HOUR);
+        assertEquals(ticket.getInTime().plusMillis(60 * 60 * 1000).truncatedTo(ChronoUnit.MINUTES), ticket.getOutTime());
         assertEquals(expectedFare, ticket.getPrice());
     }
 
     /**
-     * Check consistency of Ticket database table price and outTime values.
+     * Check consistency of discount on recurring user ticket.
+     *
      * @throws Exception in case readVehicleRegistrationNumber fails
      */
     @Test
     public void Given_recurringUser_When_userLeaves_Then_fareDiscountedBy5Percent() throws Exception {
-        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(this.regNumber); // Registration number is read once more in this method : On entrance then on exit.
-
-        // Save fake old ticket.
+        // Create recurring user previous ticket.
         Ticket oldTicket = new Ticket();
         oldTicket.setInTime(Instant.EPOCH);
-        oldTicket.setOutTime(Instant.EPOCH.plusMillis(3600000));
-        oldTicket.setVehicleRegNumber(this.regNumber);
-        oldTicket.setParkingSpot(new ParkingSpot(5,ParkingType.CAR,false));
+        oldTicket.setOutTime(Instant.EPOCH.plusMillis(60 * 60 * 1000));
+        oldTicket.setVehicleRegNumber(regNumber);
+        oldTicket.setParkingSpot(new ParkingSpot(5, ParkingType.CAR, false));
         oldTicket.setDiscounted(false);
         ticketDAO.saveTicket(oldTicket);
-
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+
+
+        // See Given_parkedForOneHour_When_userLeaves_Then_fareAndOutTimeAreCoherent for details
         parkingService.processIncomingVehicle();
-
-        Ticket ticket = ticketDAO.getTicket(this.regNumber);
-        dataBasePrepareService.antedateInTimeTicket(ticket, 3600000);
-
+        Ticket ticket = ticketDAO.getTicket(regNumber);
+        dataBasePrepareService.antedateInTimeTicket(ticket, 60 * 60 * 1000);
         parkingService.processExitingVehicle();
-        ticket = ticketDAO.getTicket(this.regNumber);
+        ticket = ticketDAO.getTicket(regNumber);
 
-        double expectedFare = Double.parseDouble(df.format((ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / 3600000.) * Fare.CAR_RATE_PER_HOUR * 0.95).replace(',', '.'));
+
+        double expectedFare = FareCalculatorService.formatFare(ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / (60. * 60. * 1000.) * Fare.CAR_RATE_PER_HOUR * 0.95);
         assertTrue(ticket.isDiscounted());
         assertEquals(expectedFare, ticket.getPrice());
     }
 
+    /**
+     * Check consistency of free 30 minutes parking.
+     *
+     * @throws Exception in case readVehicleRegistrationNumber fails
+     */
+    @Test
+    public void Given_lessThan30MinutesParking_When_userLeaves_Then_fareIsFree() throws Exception {
+        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+
+        // See Given_parkedForOneHour_When_userLeaves_Then_fareAndOutTimeAreCoherent for details
+        parkingService.processIncomingVehicle();
+        Ticket ticket = ticketDAO.getTicket(regNumber);
+        dataBasePrepareService.antedateInTimeTicket(ticket, 29 * 60 * 1000);
+        parkingService.processExitingVehicle();
+        ticket = ticketDAO.getTicket(regNumber);
+
+        assertEquals(0, ticket.getPrice());
+    }
 }

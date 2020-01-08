@@ -8,6 +8,11 @@ import java.text.DecimalFormat;
 public class FareCalculatorService {
 
     /**
+     * DecimalFormat use for fare format
+     */
+    private static DecimalFormat fareFormat = new DecimalFormat("#,##0.00");
+
+    /**
      * Calculate parking fare based on user ticket.
      *
      * @param ticket passed from ParkingService.processExitingVehicle()
@@ -20,13 +25,15 @@ public class FareCalculatorService {
             throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
         }
 
+        // Get duration in milliseconds by subtracting milliseconds equivalent outTime by milliseconds equivalent inTime.
         long durationInMs = ticket.getOutTime().toEpochMilli() - ticket.getInTime().toEpochMilli();
-        double durationInHour = durationInMs / 3600000.;
+        // Divide by number of milliseconds in one hour to get hour equivalent parking duration.
+        double durationInHour = durationInMs / (60. * 60. * 1000.);
 
+        // Free 30 minutes parking feature implementation
         if (durationInHour < 0.5) {
             ticket.setPrice(0);
-        }
-        else {
+        } else {
             double finalPrice = 0;
             switch (ticket.getParkingSpot().getParkingType()) {
                 case CAR:
@@ -39,15 +46,17 @@ public class FareCalculatorService {
                     throw new IllegalArgumentException("Unknown Parking Type");
             }
 
+            // Discount for recurring user feature implementation
             if (ticket.isDiscounted()) {
                 finalPrice *= 0.95;
             }
 
-            DecimalFormat df = new DecimalFormat();
-            df.setMaximumFractionDigits(2);
-
-            String priceToParse = df.format(finalPrice).replace(',', '.');
-            ticket.setPrice(Double.parseDouble((priceToParse.trim())));
+            ticket.setPrice(formatFare(finalPrice));
         }
+    }
+
+    public static double formatFare(final double fare) {
+        String priceToParse = fareFormat.format(fare).replace(',', '.');
+        return Double.parseDouble((priceToParse));
     }
 }
