@@ -61,16 +61,16 @@ public class ParkingService {
                 parkingSpot.setAvailable(false);
                 parkingSpotDAO.updateParking(parkingSpot); //allot this parking space and mark it's availability as false
 
-                Instant inTime = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+                Instant inTime = Instant.now().truncatedTo(ChronoUnit.MINUTES); // Seconds and milliseconds are not relevant
                 Ticket ticket = new Ticket();
                 //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
                 ticket.setParkingSpot(parkingSpot);
                 ticket.setVehicleRegNumber(vehicleRegNumber);
                 ticket.setPrice(0);
                 ticket.setInTime(inTime);
-                if (ticketDAO.getTicket(vehicleRegNumber) != null) {
+                if (ticketDAO.getTicket(vehicleRegNumber) != null) { // Check for previous ticket
                     System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
-                    ticket.setDiscounted(true);
+                    ticket.setDiscounted(true); // Save ticket as discounted
                 }
                 ticketDAO.saveTicket(ticket);
                 System.out.println("Generated Ticket and saved in DB");
@@ -145,7 +145,7 @@ public class ParkingService {
         try {
             String vehicleRegNumber = getVehicleRegNumber();
             Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
-            Instant outTime = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+            Instant outTime = Instant.now().truncatedTo(ChronoUnit.MINUTES); // Seconds and milliseconds are not relevant
             ticket.setOutTime(outTime);
             fareCalculatorService.calculateFare(ticket);
             if (ticketDAO.updateTicket(ticket)) {

@@ -10,12 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
-import java.text.DecimalFormat;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 public class FareCalculatorServiceTest {
 
@@ -27,10 +25,6 @@ public class FareCalculatorServiceTest {
      * Real Ticket class instance.
      */
     private Ticket ticket;
-    /**
-     * DecimalFormat use for fare format
-     */
-    private DecimalFormat df = new DecimalFormat();
 
     /**
      * Initialize class under test.
@@ -46,7 +40,6 @@ public class FareCalculatorServiceTest {
     @BeforeEach
     private void setUpPerTest() {
         this.ticket = new Ticket();
-        this.df.setMaximumFractionDigits(2); // Maximum two decimals for expected fares.
     }
 
     /**
@@ -117,8 +110,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_threeQuarterOfHourBikeParking_When_calculateFare_Then_priceEqualTo75PercentOfBikeHourRate() {
-        // use df.format to keep only two decimals on expectedFare.
-        double expectedFare = Double.parseDouble(df.format((0.75 * Fare.BIKE_RATE_PER_HOUR)).replace(',', '.'));
+        // use fareCalculatorService.formatFare() to keep only two decimals on expectedFare.
+        double expectedFare = FareCalculatorService.formatFare(0.75 * Fare.BIKE_RATE_PER_HOUR);
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(45 * 60 * 1000); //45 minutes parking time should give 3/4th parking fare
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
@@ -135,8 +128,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_threeQuarterOfHourCarParking_When_calculateFare_Then_priceEqualTo75PercentOfCarHourRate() {
-        // use df.format to keep only two decimals on expectedFare.
-        double expectedFare = Double.parseDouble(df.format((0.75 * Fare.CAR_RATE_PER_HOUR)).replace(',', '.'));
+        // use fareCalculatorService.formatFare() to keep only two decimals on expectedFare.
+        double expectedFare = FareCalculatorService.formatFare(0.75 * Fare.CAR_RATE_PER_HOUR);
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(45 * 60 * 1000); //45 minutes parking time should give 3/4th parking fare
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
@@ -169,8 +162,8 @@ public class FareCalculatorServiceTest {
      */
     @Test
     public void Given_previousTicketForCarUser_When_calculateFare_Then_ticketPriceDiscountedBy5Percent() {
-        // use df.format to keep only two decimals on expectedFare.
-        double discountedFare = Double.parseDouble(df.format((0.95 * Fare.CAR_RATE_PER_HOUR)).replace(',', '.'));
+        // use fareCalculatorService.formatFare() to keep only two decimals on expectedFare.
+        double discountedFare = FareCalculatorService.formatFare(0.95 * Fare.CAR_RATE_PER_HOUR);
 
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(60 * 60 * 1000); // 60 minutes parking.

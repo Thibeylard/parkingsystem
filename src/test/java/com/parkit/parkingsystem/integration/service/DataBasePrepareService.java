@@ -37,7 +37,7 @@ public class DataBasePrepareService {
     }
 
     /**
-     * Used to antedate a ticket in database for reproductibility purpose
+     * Used to antedate a ticket in database for reproductibility purpose.
      * @param ticket ticket to antedate
      * @param msToAntedate Number of milliseconds to antedate
      * @return true if operation succeeded

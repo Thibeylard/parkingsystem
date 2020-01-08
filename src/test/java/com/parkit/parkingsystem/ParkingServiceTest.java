@@ -17,10 +17,13 @@ import java.time.Instant;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
 public class ParkingServiceTest {
@@ -48,6 +51,7 @@ public class ParkingServiceTest {
      * Predefined value for regNumber values.
      */
     private static final String regNumber = "ABCDEF";
+
     /**
      * Initialize theoretical situation for tests.
      */
@@ -58,6 +62,7 @@ public class ParkingServiceTest {
 
     /**
      * Check if processIncomingVehicleTest has really called DAOs methods.
+     * @throws Exception for readVehicleRegistrationNumber()
      */
     @Test
     public void Given_anyVehicle_When_enterParking_Then_callDAOMethods() throws Exception {
@@ -92,7 +97,7 @@ public class ParkingServiceTest {
             ticket.setParkingSpot(parkingSpot);
             ticket.setVehicleRegNumber(regNumber);
 
-            when(ticket.getOutTime()).thenReturn(mockedOutTime,mockedOutTime,mockedOutTime); // ticket.getOutTime() is called three times in processExitingVehicle().
+            when(ticket.getOutTime()).thenReturn(mockedOutTime, mockedOutTime, mockedOutTime); // ticket.getOutTime() is called three times in processExitingVehicle().
             when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
             when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
             when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
@@ -111,7 +116,7 @@ public class ParkingServiceTest {
     public void Given_userFillCarType_When_getVehicleType_Then_returnParkingSpot1() {
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(1);
-        assertEquals(new ParkingSpot(1,ParkingType.CAR,true), parkingService.getNextParkingNumberIfAvailable());
+        assertEquals(new ParkingSpot(1, ParkingType.CAR, true), parkingService.getNextParkingNumberIfAvailable());
     }
 
     /**
@@ -121,7 +126,7 @@ public class ParkingServiceTest {
     public void Given_userFillBikeType_When_getVehicleType_Then_returnParkingSpot3() {
         when(inputReaderUtil.readSelection()).thenReturn(2);
         when(parkingSpotDAO.getNextAvailableSlot(ParkingType.BIKE)).thenReturn(3);
-        assertEquals(new ParkingSpot(3,ParkingType.CAR,true), parkingService.getNextParkingNumberIfAvailable());
+        assertEquals(new ParkingSpot(3, ParkingType.CAR, true), parkingService.getNextParkingNumberIfAvailable());
     }
 
     /**
@@ -129,7 +134,7 @@ public class ParkingServiceTest {
      */
     @Test
     public void Given_userFillWrongParkingType_When_getVehicleType_Then_throwsIllegalArgumentException() {
-        when(inputReaderUtil.readSelection()).thenReturn(13);;
+        when(inputReaderUtil.readSelection()).thenReturn(13);
         assertNull(parkingService.getNextParkingNumberIfAvailable());
     }
 }

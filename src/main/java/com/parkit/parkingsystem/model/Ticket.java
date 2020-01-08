@@ -20,11 +20,11 @@ public class Ticket {
      */
     private double price;
     /**
-     * Creation time.
+     * Creation time : Instant instance truncated to ChronoUnit.MINUTES
      */
     private Instant inTime;
     /**
-     * Resolution time.
+     * Exit time : Instant instance truncated to ChronoUnit.MINUTES
      */
     private Instant outTime = null;
     /**
