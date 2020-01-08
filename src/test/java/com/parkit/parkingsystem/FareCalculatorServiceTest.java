@@ -179,4 +179,21 @@ public class FareCalculatorServiceTest {
         fareCalculatorService.calculateFare(ticket);
         assertEquals(discountedFare, ticket.getPrice());
     }
+
+    /**
+     * Check free fare under 30 minutes parking.
+     */
+    @Test
+    public void Given_lessThan30MinutesParking_When_calculateFare_Then_freeFare() {
+        Instant inTime = Instant.EPOCH;
+        Instant outTime = Instant.EPOCH.plusMillis(29 * 60 * 1000);
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setDiscounted(false);
+        fareCalculatorService.calculateFare(ticket);
+        assertEquals(0, ticket.getPrice());
+    }
 }
