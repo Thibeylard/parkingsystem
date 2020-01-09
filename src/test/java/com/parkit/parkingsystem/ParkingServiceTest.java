@@ -82,6 +82,19 @@ public class ParkingServiceTest {
     }
 
     /**
+     * Check if processIncomingVehicleTest has really called DAOs methods.
+     */
+    @Test
+    public void Given_fullParking_When_enterParking_Then_abortIncomingProcess() {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+
+        when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(-1);
+
+        parkingService.processIncomingVehicle();
+        verify(parkingSpotDAO, Mockito.times(0)).updateParking(any(ParkingSpot.class));
+    }
+
+    /**
      * Check if processExitingVehicleTest has really called parkingSpotDAO.updateParking().
      */
     @Test
@@ -97,7 +110,7 @@ public class ParkingServiceTest {
             ticket.setParkingSpot(parkingSpot);
             ticket.setVehicleRegNumber(regNumber);
 
-            when(ticket.getOutTime()).thenReturn(mockedOutTime, mockedOutTime, mockedOutTime); // ticket.getOutTime() is called three times in processExitingVehicle().
+            when(ticket.getOutTime()).thenReturn(mockedOutTime, mockedOutTime, mockedOutTime); // ticket.getOutTime() is called three times in fareCalculatorService.
             when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
             when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
             when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
@@ -110,7 +123,7 @@ public class ParkingServiceTest {
     }
 
     /**
-     * Check ParkingType.CAR user entry when vehicle type asked.
+     * Check ParkingType.CAR user entry when vehicle type asked returns correct ParkingSpot.
      */
     @Test
     public void Given_userFillCarType_When_getVehicleType_Then_returnParkingSpot1() {
@@ -120,7 +133,7 @@ public class ParkingServiceTest {
     }
 
     /**
-     * Check ParkingType.BIKE user entry when vehicle type asked.
+     * Check ParkingType.BIKE user entry when vehicle type asked returns correct ParkingSpot.
      */
     @Test
     public void Given_userFillBikeType_When_getVehicleType_Then_returnParkingSpot3() {
@@ -130,11 +143,43 @@ public class ParkingServiceTest {
     }
 
     /**
-     * Check wrong user entry when vehicle type asked.
+     * Check wrong user entry when vehicle type asked returns no ParkingSpot.
      */
     @Test
     public void Given_userFillWrongParkingType_When_getVehicleType_Then_throwsIllegalArgumentException() {
         when(inputReaderUtil.readSelection()).thenReturn(13);
         assertNull(parkingService.getNextParkingNumberIfAvailable());
+    }
+
+    /**
+     * Check wrong user entry when vehicle type asked.
+     * @throws Exception for readVehicleRegistrationNumber()
+     */
+    @Test
+    public void Given_noTicketForFilledRegNumber_When_exitVehicle_Then_abortExitingWithoutUpdatingTicket() throws Exception {
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(regNumber);
+        when(ticketDAO.getTicket(regNumber)).thenReturn(null);
+        parkingService.processExitingVehicle();
+        verify(ticketDAO,Mockito.times(0)).updateTicket(any(Ticket.class));
+    }
+
+    /**
+     * Check wrong user entry when vehicle type asked.
+     * @throws Exception for readVehicleRegistrationNumber()
+     */
+    @Test
+    public void Given_errorOnUpdate_When_exitVehicle_Then_abortExitingWithoutAskingPrice() throws Exception {
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(regNumber);
+        Ticket ticket = spy(new Ticket());
+        ticket.setInTime(Instant.EPOCH);
+        Instant mockedOutTime = Instant.EPOCH.plusMillis(60 * 60 * 1000); // ticket outTime that will be returned by ticket.getOutTime()
+        ticket.setParkingSpot(new ParkingSpot(1, ParkingType.CAR, false));
+        ticket.setVehicleRegNumber(regNumber);
+
+        when(ticket.getOutTime()).thenReturn(mockedOutTime, mockedOutTime, mockedOutTime); // ticket.getOutTime() is called three times in fareCalculatorService.
+        when(ticketDAO.getTicket(regNumber)).thenReturn(ticket);
+        when(ticketDAO.updateTicket(ticket)).thenReturn(false);
+
+        parkingService.processExitingVehicle();
     }
 }
