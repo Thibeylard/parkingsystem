@@ -1,6 +1,5 @@
 package com.parkit.parkingsystem.service;
 
-import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
 
 import java.text.DecimalFormat;
@@ -35,16 +34,7 @@ public class FareCalculatorService {
             ticket.setPrice(0);
         } else {
             double finalPrice = 0;
-            switch (ticket.getParkingSpot().getParkingType()) {
-                case CAR:
-                    finalPrice = durationInHour * Fare.CAR_RATE_PER_HOUR;
-                    break;
-                case BIKE:
-                    finalPrice = durationInHour * Fare.BIKE_RATE_PER_HOUR;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown Parking Type");
-            }
+            finalPrice = durationInHour * ticket.getParkingSpot().getParkingType().getFare();
 
             // Discount for recurring user feature implementation
             if (ticket.isDiscounted()) {

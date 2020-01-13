@@ -1,6 +1,5 @@
 package com.parkit.parkingsystem.integration;
 
-import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
@@ -115,7 +114,7 @@ public class ParkingDataBaseIT {
         parkingService.processExitingVehicle();
         ticket = ticketDAO.getTicket(regNumber); // Get back ticket updated in processExitingVehicle()
 
-        double expectedFare = FareCalculatorService.formatFare(ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / (60. * 60. * 1000.) * Fare.CAR_RATE_PER_HOUR);
+        double expectedFare = FareCalculatorService.formatFare(ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / (60. * 60. * 1000.) * ParkingType.CAR.getFare());
         assertEquals(ticket.getInTime().plusMillis(60 * 60 * 1000).truncatedTo(ChronoUnit.MINUTES), ticket.getOutTime());
         assertEquals(expectedFare, ticket.getPrice());
     }
@@ -146,7 +145,7 @@ public class ParkingDataBaseIT {
         ticket = ticketDAO.getTicket(regNumber);
 
 
-        double expectedFare = FareCalculatorService.formatFare(ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / (60. * 60. * 1000.) * Fare.CAR_RATE_PER_HOUR * 0.95);
+        double expectedFare = FareCalculatorService.formatFare(ticket.getOutTime().minusMillis(ticket.getInTime().toEpochMilli()).toEpochMilli() / (60. * 60. * 1000.) * ParkingType.CAR.getFare() * 0.95);
         assertTrue(ticket.isDiscounted());
         assertEquals(expectedFare, ticket.getPrice());
     }
