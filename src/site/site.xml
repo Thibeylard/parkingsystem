@@ -2,17 +2,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd">
 
-    <publishDate position="left" format="dd/MM/yyyy" />
-    <version position="left" />
+    <publishDate position="right" format="dd/MM/yyyy" />
+    <version position="right" />
     <skin>
         <groupId>org.apache.maven.skins</groupId>
         <artifactId>maven-fluido-skin</artifactId>
         <version>1.8</version>
     </skin>
+
     <body>
         <breadcrumbs>
-            <item name="Accueil" href="index.html" />
+            <item name="Accueil" href="summary.html" />
         </breadcrumbs>
+
         <menu ref="reports" inherit="top"/>
     </body>
 </project>
