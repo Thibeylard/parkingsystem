@@ -10,6 +10,7 @@ import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
@@ -20,6 +21,7 @@ import org.mockito.Mockito;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -85,13 +87,36 @@ public class ParkingServiceTest {
      * Check if processIncomingVehicleTest has really called DAOs methods.
      */
     @Test
-    public void Given_fullParking_When_enterParking_Then_abortIncomingProcess() {
+    public void Given_fullParking_When_enterParking_Then_noTicketSaved() {
         when(inputReaderUtil.readSelection()).thenReturn(1);
 
         when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(-1);
 
         parkingService.processIncomingVehicle();
-        verify(parkingSpotDAO, Mockito.times(0)).updateParking(any(ParkingSpot.class));
+        verify(ticketDAO, Mockito.times(0)).saveTicket(any(Ticket.class));
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void Given_recurringUser_When_enterParking_Then_discountTicket() throws Exception {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(regNumber);
+
+        when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(1);
+        when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
+
+        Ticket oldTicket = new Ticket();
+        when(ticketDAO.getTicket(regNumber)).thenReturn(oldTicket);
+        when(ticketDAO.saveTicket(any(Ticket.class))).thenReturn(true);
+
+        parkingService.processIncomingVehicle();
+
+        ArgumentCaptor<Ticket> newTicket = ArgumentCaptor.forClass(Ticket.class);
+        verify(ticketDAO).saveTicket(newTicket.capture());
+
+        assertTrue(newTicket.getValue().isDiscounted());
     }
 
     /**
