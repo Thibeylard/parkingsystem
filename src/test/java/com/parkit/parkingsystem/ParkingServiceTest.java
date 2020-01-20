@@ -67,7 +67,7 @@ public class ParkingServiceTest {
      * @throws Exception for readVehicleRegistrationNumber()
      */
     @Test
-    public void Given_anyVehicle_When_enterParking_Then_callDAOMethods() throws Exception {
+    public void Given_anyVehicle_When_enterParking_Then_ticketSaved() throws Exception {
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(regNumber);
 
@@ -77,9 +77,6 @@ public class ParkingServiceTest {
         when(ticketDAO.saveTicket(any(Ticket.class))).thenReturn(true);
 
         parkingService.processIncomingVehicle();
-        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
-        verify(parkingSpotDAO, Mockito.times(1)).getNextAvailableSlot(ParkingType.CAR);
-        verify(ticketDAO, Mockito.times(1)).getTicket(regNumber);
         verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
     }
 
@@ -188,23 +185,4 @@ public class ParkingServiceTest {
         verify(ticketDAO,Mockito.times(0)).updateTicket(any(Ticket.class));
     }
 
-    /**
-     * Check wrong user entry when vehicle type asked.
-     * @throws Exception for readVehicleRegistrationNumber()
-     */
-    @Test
-    public void Given_errorOnUpdate_When_exitVehicle_Then_abortExitingWithoutAskingPrice() throws Exception {
-        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(regNumber);
-        Ticket ticket = spy(new Ticket());
-        ticket.setInTime(Instant.EPOCH);
-        Instant mockedOutTime = Instant.EPOCH.plusMillis(60 * 60 * 1000); // ticket outTime that will be returned by ticket.getOutTime()
-        ticket.setParkingSpot(new ParkingSpot(1, ParkingType.CAR, false));
-        ticket.setVehicleRegNumber(regNumber);
-
-        when(ticket.getOutTime()).thenReturn(mockedOutTime, mockedOutTime, mockedOutTime); // ticket.getOutTime() is called three times in fareCalculatorService.
-        when(ticketDAO.getTicket(regNumber)).thenReturn(ticket);
-        when(ticketDAO.updateTicket(ticket)).thenReturn(false);
-
-        parkingService.processExitingVehicle();
-    }
 }
