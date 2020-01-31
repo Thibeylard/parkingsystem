@@ -5,9 +5,7 @@ import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 
 import java.time.Instant;
@@ -46,6 +44,7 @@ public class FareCalculatorServiceTest {
      * Check consistency between car hour rate and one hour parking fare.
      */
     @Test
+    @DisplayName("Equivalence fare/parkingDuration : one car hour")
     public void Given_oneHourCarParking_When_calculateFare_Then_priceEqualCarRatePerHour() {
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(60 * 60 * 1000);
@@ -62,6 +61,7 @@ public class FareCalculatorServiceTest {
      * Check consistency between bike hour rate and one hour parking fare.
      */
     @Test
+    @DisplayName("Equivalence fare/parkingDuration : one bike hour")
     public void Given_oneHourBikeParking_When_calculateFare_Then_priceEqualBikeRatePerHour() {
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(60 * 60 * 1000);
@@ -79,6 +79,7 @@ public class FareCalculatorServiceTest {
      * Check exception handling in unknown vehicle fail case.
      */
     @Test
+    @DisplayName("No such ParkingType Exception")
     public void Given_oneHourParkingForUnknownVehicle_When_calculateFare_Then_throwsNullPointerException() {
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(60 * 60 * 1000);
@@ -94,6 +95,7 @@ public class FareCalculatorServiceTest {
      * Check consistency between car hour rate and one hour parking fare.
      */
     @Test
+    @DisplayName("InHour greater than OutHour Exception")
     public void Given_inTimeGreaterThanOutTimeParking_When_calculateFare_Then_throwsIllegalArgumentException() {
         Instant inTime = Instant.EPOCH.plusMillis(60 * 60 * 1000); // inTime is one hour greater than outTime.
         Instant outTime = Instant.EPOCH;
@@ -109,6 +111,7 @@ public class FareCalculatorServiceTest {
      * Check consistency between bike hour rate and three quarter of hour parking fare.
      */
     @Test
+    @DisplayName("Equivalence fare/parkingDuration : three quarter bike hour")
     public void Given_threeQuarterOfHourBikeParking_When_calculateFare_Then_priceEqualTo75PercentOfBikeHourRate() {
         // use fareCalculatorService.formatFare() to keep only two decimals on expectedFare.
         double expectedFare = FareCalculatorService.formatFare(0.75 * Fare.BIKE_RATE_PER_HOUR);
@@ -127,6 +130,7 @@ public class FareCalculatorServiceTest {
      * Check consistency between car hour rate and three quarter of hour parking fare.
      */
     @Test
+    @DisplayName("Equivalence fare/parkingDuration : three quarter car hour")
     public void Given_threeQuarterOfHourCarParking_When_calculateFare_Then_priceEqualTo75PercentOfCarHourRate() {
         // use fareCalculatorService.formatFare() to keep only two decimals on expectedFare.
         double expectedFare = FareCalculatorService.formatFare(0.75 * Fare.CAR_RATE_PER_HOUR);
@@ -145,6 +149,7 @@ public class FareCalculatorServiceTest {
      * Check consistency between car hour rate and one day parking fare.
      */
     @Test
+    @DisplayName("Equivalence fare/parkingDuration : one car day")
     public void Given_oneDayParking_When_calculateFare_Then_priceEqualTo24TimesHourRate() {
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(24 * 60 * 60 * 1000); //24 hours parking time should give 24 * parking fare per hour
@@ -161,6 +166,7 @@ public class FareCalculatorServiceTest {
      * Check consistency between previous saved ticket and discount on new ticket.
      */
     @Test
+    @DisplayName("Equivalence fare/parkingDuration : one discounted car hour")
     public void Given_previousTicketForCarUser_When_calculateFare_Then_ticketPriceDiscountedBy5Percent() {
         // use fareCalculatorService.formatFare() to keep only two decimals on expectedFare.
         double discountedFare = FareCalculatorService.formatFare(0.95 * Fare.CAR_RATE_PER_HOUR);
@@ -181,6 +187,7 @@ public class FareCalculatorServiceTest {
      * Check free fare under 30 minutes parking.
      */
     @Test
+    @DisplayName("Equivalence fare/parkingDuration : free under thirty minutes.")
     public void Given_lessThan30MinutesParking_When_calculateFare_Then_freeFare() {
         Instant inTime = Instant.EPOCH;
         Instant outTime = Instant.EPOCH.plusMillis(29 * 60 * 1000); // Test on 29 minutes parking
