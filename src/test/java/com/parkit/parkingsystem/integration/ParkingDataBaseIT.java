@@ -10,10 +10,7 @@ import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -92,6 +89,7 @@ public class ParkingDataBaseIT {
      * Check consistency of Ticket and ParkingSpot database tables save.
      */
     @Test
+    @DisplayName("Incoming success story")
     public void Given_parkingSpot1Available_When_userEntersWithCar_Then_ticketSavedAndSpotUnavailable() {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
@@ -105,6 +103,7 @@ public class ParkingDataBaseIT {
      * @throws Exception in case readVehicleRegistrationNumber fails
      */
     @Test
+    @DisplayName("Valid parking ticket price")
     public void Given_parkedForOneHour_When_userLeaves_Then_fareAndOutTimeAreCoherent() throws Exception {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 
@@ -125,6 +124,7 @@ public class ParkingDataBaseIT {
      * @throws Exception in case readVehicleRegistrationNumber fails
      */
     @Test
+    @DisplayName("Valid discount on ticket price")
     public void Given_recurringUser_When_userLeaves_Then_fareDiscountedBy5Percent() throws Exception {
         // Create recurring user previous ticket.
         Ticket oldTicket = new Ticket();
@@ -156,6 +156,7 @@ public class ParkingDataBaseIT {
      * @throws Exception in case readVehicleRegistrationNumber fails
      */
     @Test
+    @DisplayName("Free ticket for 30 minutes parking")
     public void Given_lessThan30MinutesParking_When_userLeaves_Then_fareIsFree() throws Exception {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 
