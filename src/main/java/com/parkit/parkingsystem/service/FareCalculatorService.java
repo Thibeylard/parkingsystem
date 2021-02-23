@@ -1,31 +1,52 @@
 package com.parkit.parkingsystem.service;
 
-import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
+
+import java.text.DecimalFormat;
 
 public class FareCalculatorService {
 
-    public void calculateFare(Ticket ticket){
-        if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
-            throw new IllegalArgumentException("Out time provided is incorrect:"+ticket.getOutTime().toString());
+    /**
+     * DecimalFormat use for fare format
+     */
+    private static DecimalFormat fareFormat = new DecimalFormat("#,##0.00");
+
+    /**
+     * Calculate parking fare based on user ticket.
+     *
+     * @param ticket passed from ParkingService.processExitingVehicle()
+     */
+    public void calculateFare(final Ticket ticket) {
+        if ((ticket.getOutTime() == null)) {
+            throw new IllegalArgumentException("No out time provided");
+        }
+        if ((ticket.getOutTime().isBefore(ticket.getInTime()))) {
+            throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
         }
 
-        int inHour = ticket.getInTime().getHours();
-        int outHour = ticket.getOutTime().getHours();
+        // Get duration in milliseconds by subtracting milliseconds equivalent outTime by milliseconds equivalent inTime.
+        long durationInMs = ticket.getOutTime().toEpochMilli() - ticket.getInTime().toEpochMilli();
+        // Divide by number of milliseconds in one hour to get hour equivalent parking duration.
+        double durationInHour = durationInMs / (60. * 60. * 1000.);
 
-        //TODO: Some tests are failing here. Need to check if this logic is correct
-        int duration = outHour - inHour;
+        // Free 30 minutes parking feature implementation
+        if (durationInHour < 0.5) {
+            ticket.setPrice(0);
+        } else {
+            double finalPrice = 0;
+            finalPrice = durationInHour * ticket.getParkingSpot().getParkingType().getFare();
 
-        switch (ticket.getParkingSpot().getParkingType()){
-            case CAR: {
-                ticket.setPrice(duration * Fare.CAR_RATE_PER_HOUR);
-                break;
+            // Discount for recurring user feature implementation
+            if (ticket.isDiscounted()) {
+                finalPrice *= 0.95;
             }
-            case BIKE: {
-                ticket.setPrice(duration * Fare.BIKE_RATE_PER_HOUR);
-                break;
-            }
-            default: throw new IllegalArgumentException("Unkown Parking Type");
+
+            ticket.setPrice(formatFare(finalPrice));
         }
+    }
+
+    public static double formatFare(final double fare) {
+        String priceToParse = fareFormat.format(fare).replace(',', '.');
+        return Double.parseDouble((priceToParse));
     }
 }
